@@ -40,13 +40,20 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // --- NEW: Load sound effects ---
         this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
         this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
         this.load.audio('gameOverSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/cratedrop.wav');
+
+        // --- NEW: Load background and game over music ---
+        this.load.audio('bgm', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/tetris-bgm.mp3');
+        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/game-over.mp3');
     }
 
     create() {
+        // --- NEW: Play background music ---
+        this.bgm = this.sound.add('bgm', { loop: true, volume: 0.5 });
+        this.bgm.play();
+
         const boardBg = this.add.graphics();
         boardBg.fillStyle(0x222222);
         boardBg.fillRect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
@@ -111,8 +118,11 @@ class GameScene extends Phaser.Scene {
             if (this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY)) {
                 this.gameOver = true;
                 this.gameOverText.setVisible(true);
-                // --- NEW: Play game over sound ---
                 this.sound.play('gameOverSound');
+                
+                // --- NEW: Stop BGM and play game over music ---
+                this.bgm.stop();
+                this.sound.play('gameOverMusic');
             }
         }
     }
@@ -150,7 +160,6 @@ class GameScene extends Phaser.Scene {
             this.pieceY++;
         }
         this.solidifyPiece();
-        // --- NEW: Play hard drop sound ---
         this.sound.play('dropSound');
         this.clearLines();
         this.spawnPiece();
@@ -216,7 +225,6 @@ class GameScene extends Phaser.Scene {
         if (linesCleared > 0) {
             this.score += linesCleared * 10 * linesCleared;
             this.scoreText.setText('Score: ' + this.score);
-            // --- NEW: Play line clear sound ---
             this.sound.play('clearSound');
         }
     }
