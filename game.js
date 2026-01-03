@@ -40,23 +40,24 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // No assets to load for this simple version
+        // --- NEW: Load sound effects ---
+        this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
+        this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
+        this.load.audio('gameOverSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/cratedrop.wav');
     }
 
     create() {
-        // --- NEW: Draw a background for the play area to distinguish it ---
         const boardBg = this.add.graphics();
-        boardBg.fillStyle(0x222222); // Dark grey
+        boardBg.fillStyle(0x222222);
         boardBg.fillRect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
         
         this.initBoard();
         this.spawnPiece();
-        this.spawnPiece(); // Call twice to have a 'next' piece
+        this.spawnPiece();
 
         this.graphics = this.add.graphics();
         this.scoreText = this.add.text(COLS * BLOCK_SIZE + 20, 20, 'Score: 0', { fontSize: '24px', fill: '#fff' });
         
-        // --- NEW: Add UI for the "Next" piece ---
         this.add.text(COLS * BLOCK_SIZE + 20, 80, 'Next:', { fontSize: '24px', fill: '#fff' });
         this.previewGraphics = this.add.graphics();
         const previewBox = this.add.graphics();
@@ -67,7 +68,6 @@ class GameScene extends Phaser.Scene {
         this.gameOverText.setVisible(false);
 
         this.cursors = this.input.keyboard.createCursorKeys();
-        // --- NEW: Add space key for hard drop ---
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
 
@@ -111,6 +111,8 @@ class GameScene extends Phaser.Scene {
             if (this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY)) {
                 this.gameOver = true;
                 this.gameOverText.setVisible(true);
+                // --- NEW: Play game over sound ---
+                this.sound.play('gameOverSound');
             }
         }
     }
@@ -143,12 +145,13 @@ class GameScene extends Phaser.Scene {
         }
     }
 
-    // --- NEW: Hard drop function ---
     hardDrop() {
         while (!this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY + 1)) {
             this.pieceY++;
         }
         this.solidifyPiece();
+        // --- NEW: Play hard drop sound ---
+        this.sound.play('dropSound');
         this.clearLines();
         this.spawnPiece();
     }
@@ -169,7 +172,7 @@ class GameScene extends Phaser.Scene {
             if (!this.checkCollision(newShape, this.pieceX + offsetX, this.pieceY)) {
                 this.pieceX += offsetX;
                 this.currentPiece.shape = newShape;
-                return; // Successful rotation
+                return;
             }
         }
     }
@@ -211,8 +214,10 @@ class GameScene extends Phaser.Scene {
             }
         }
         if (linesCleared > 0) {
-            this.score += linesCleared * 10 * linesCleared; // Basic scoring
+            this.score += linesCleared * 10 * linesCleared;
             this.scoreText.setText('Score: ' + this.score);
+            // --- NEW: Play line clear sound ---
+            this.sound.play('clearSound');
         }
     }
 
@@ -220,35 +225,29 @@ class GameScene extends Phaser.Scene {
         this.graphics.clear();
         this.previewGraphics.clear();
 
-        // Draw board
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 if (this.board[y][x] !== 0) {
                     this.graphics.fillStyle(COLORS[this.board[y][x]], 1);
-                    // --- MODIFIED: Use BLOCK_SIZE - 1 to create a grid effect ---
                     this.graphics.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
                 }
             }
         }
 
-        // Draw current piece
         if (this.currentPiece) {
             const shape = this.currentPiece.shape;
             this.graphics.fillStyle(COLORS[this.currentPiece.colorId], 1);
             for (let y = 0; y < shape.length; y++) {
                 for (let x = 0; x < shape[y].length; x++) {
                     if (shape[y][x] !== 0) {
-                         // --- MODIFIED: Use BLOCK_SIZE - 1 to create a grid effect ---
                          this.graphics.fillRect((this.pieceX + x) * BLOCK_SIZE, (this.pieceY + y) * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
                     }
                 }
             }
         }
         
-        // --- NEW: Draw next piece in the preview box ---
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
-            // Center the piece in the preview box
             const previewBoxWidth = 4 * BLOCK_SIZE;
             const previewBoxHeight = 4 * BLOCK_SIZE;
             const pieceWidth = shape[0].length * BLOCK_SIZE;
