@@ -37,19 +37,21 @@ class GameScene extends Phaser.Scene {
         this.lastTime = 0;
         this.score = 0;
         this.gameOver = false;
+
+        // --- NEW: Leveling System Variables ---
+        this.level = 1;
+        this.linesCleared = 0;
+        // -------------------------------------
     }
 
     preload() {
         this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
         this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
-        
-        // --- NEW: Load background and game over music ---
         this.load.audio('bgm', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/tetris-bgm.mp3');
         this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/game-over.mp3');
     }
 
     create() {
-        // --- NEW: Play background music ---
         this.bgm = this.sound.add('bgm', { loop: true, volume: 0.5 });
         this.bgm.play();
 
@@ -59,16 +61,19 @@ class GameScene extends Phaser.Scene {
         
         this.initBoard();
         this.spawnPiece();
-        this.spawnPiece();
+        this.spawnPiece(); // Initialize current and next piece
 
         this.graphics = this.add.graphics();
-        this.scoreText = this.add.text(COLS * BLOCK_SIZE + 20, 20, 'Score: 0', { fontSize: '24px', fill: '#fff' });
         
-        this.add.text(COLS * BLOCK_SIZE + 20, 80, 'Next:', { fontSize: '24px', fill: '#fff' });
+        // --- UI Text Setup ---
+        this.scoreText = this.add.text(COLS * BLOCK_SIZE + 20, 20, 'Score: 0', { fontSize: '24px', fill: '#fff' });
+        this.levelText = this.add.text(COLS * BLOCK_SIZE + 20, 50, 'Level: 1', { fontSize: '24px', fill: '#fff' }); // NEW: Level display
+        this.add.text(COLS * BLOCK_SIZE + 20, 100, 'Next:', { fontSize: '24px', fill: '#fff' });
         this.previewGraphics = this.add.graphics();
         const previewBox = this.add.graphics();
         previewBox.lineStyle(2, 0x888888, 1);
-        previewBox.strokeRect(COLS * BLOCK_SIZE + 20, 120, 4 * BLOCK_SIZE, 4 * BLOCK_SIZE);
+        previewBox.strokeRect(COLS * BLOCK_SIZE + 20, 140, 4 * BLOCK_SIZE, 4 * BLOCK_SIZE);
+        // -------------------
 
         this.gameOverText = this.add.text((COLS * BLOCK_SIZE) / 2, (ROWS * BLOCK_SIZE) / 2, 'GAME OVER', { fontSize: '48px', fill: '#f00' }).setOrigin(0.5);
         this.gameOverText.setVisible(false);
@@ -117,8 +122,6 @@ class GameScene extends Phaser.Scene {
             if (this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY)) {
                 this.gameOver = true;
                 this.gameOverText.setVisible(true);
-                
-                // --- NEW: Stop BGM and play game over music ---
                 this.bgm.stop();
                 this.sound.play('gameOverMusic');
             }
@@ -211,19 +214,29 @@ class GameScene extends Phaser.Scene {
     }
 
     clearLines() {
-        let linesCleared = 0;
+        let numLinesCleared = 0;
         for (let y = ROWS - 1; y >= 0; y--) {
             if (this.board[y].every(value => value !== 0)) {
-                linesCleared++;
+                numLinesCleared++;
                 this.board.splice(y, 1);
                 this.board.unshift(Array(COLS).fill(0));
                 y++;
             }
         }
-        if (linesCleared > 0) {
-            this.score += linesCleared * 10 * linesCleared;
+        if (numLinesCleared > 0) {
+            this.score += numLinesCleared * 10 * numLinesCleared;
             this.scoreText.setText('Score: ' + this.score);
             this.sound.play('clearSound');
+
+            // --- NEW: Level Up Logic ---
+            this.linesCleared += numLinesCleared;
+            if (this.linesCleared >= this.level * 10) {
+                this.level++;
+                this.levelText.setText('Level: ' + this.level);
+                // Increase speed: decrease the drop interval, but with a minimum speed
+                this.dropInterval = Math.max(150, 1000 - (this.level - 1) * 75);
+            }
+            // -------------------------
         }
     }
 
@@ -260,7 +273,7 @@ class GameScene extends Phaser.Scene {
             const pieceHeight = shape.length * BLOCK_SIZE;
 
             const previewX = (COLS * BLOCK_SIZE + 20) + (previewBoxWidth - pieceWidth) / 2;
-            const previewY = 120 + (previewBoxHeight - pieceHeight) / 2;
+            const previewY = 140 + (previewBoxHeight - pieceHeight) / 2;
             
             this.previewGraphics.fillStyle(COLORS[this.nextPiece.colorId], 1);
             for (let y = 0; y < shape.length; y++) {
