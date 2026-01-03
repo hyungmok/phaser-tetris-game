@@ -43,9 +43,9 @@ class GameScene extends Phaser.Scene {
         this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
         this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
         
-        // --- NEW: Load background and game over music ---
-        this.load.audio('bgm', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/tetris-bgm.mp3');
-        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/game-over.mp3');
+        // --- FIX: Use correct URLs for audio assets ---
+        this.load.audio('bgm', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/oedipus_wizball_highscore.mp3');
+        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/gameover.wav');
     }
 
     create() {
