@@ -45,7 +45,7 @@ class GameScene extends Phaser.Scene {
         
         // --- FIX: Use correct URLs for audio assets ---
         this.load.audio('bgm', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/oedipus_wizball_highscore.mp3');
-        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/GameOver.mp3'); // Corrected URL
+        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/gameover.mp3'); // Corrected URL
     }
 
     create() {
