@@ -44,13 +44,26 @@ class GameScene extends Phaser.Scene {
     }
 
     create() {
+        // --- NEW: Draw a background for the play area to distinguish it ---
+        const boardBg = this.add.graphics();
+        boardBg.fillStyle(0x222222); // Dark grey
+        boardBg.fillRect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
+        
         this.initBoard();
         this.spawnPiece();
         this.spawnPiece(); // Call twice to have a 'next' piece
 
         this.graphics = this.add.graphics();
         this.scoreText = this.add.text(COLS * BLOCK_SIZE + 20, 20, 'Score: 0', { fontSize: '24px', fill: '#fff' });
-        this.gameOverText = this.add.text(this.game.config.width / 2, this.game.config.height / 2, 'GAME OVER', { fontSize: '48px', fill: '#f00' }).setOrigin(0.5);
+        
+        // --- NEW: Add UI for the "Next" piece ---
+        this.add.text(COLS * BLOCK_SIZE + 20, 80, 'Next:', { fontSize: '24px', fill: '#fff' });
+        this.previewGraphics = this.add.graphics();
+        const previewBox = this.add.graphics();
+        previewBox.lineStyle(2, 0x888888, 1);
+        previewBox.strokeRect(COLS * BLOCK_SIZE + 20, 120, 4 * BLOCK_SIZE, 4 * BLOCK_SIZE);
+
+        this.gameOverText = this.add.text((COLS * BLOCK_SIZE) / 2, (ROWS * BLOCK_SIZE) / 2, 'GAME OVER', { fontSize: '48px', fill: '#f00' }).setOrigin(0.5);
         this.gameOverText.setVisible(false);
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -136,7 +149,6 @@ class GameScene extends Phaser.Scene {
             }
         }
 
-        // Test positions with wall kicks: 0 (current), -1 (left), +1 (right), -2, +2
         const testOffsets = [0, -1, 1, -2, 2]; 
 
         for (const offsetX of testOffsets) {
@@ -146,8 +158,6 @@ class GameScene extends Phaser.Scene {
                 return; // Successful rotation
             }
         }
-        
-        // If all kicks fail, the piece does not rotate.
     }
 
     checkCollision(shape, pieceX, pieceY) {
@@ -183,7 +193,6 @@ class GameScene extends Phaser.Scene {
                 linesCleared++;
                 this.board.splice(y, 1);
                 this.board.unshift(Array(COLS).fill(0));
-                // Since we removed a line, we need to check the same y index again
                 y++;
             }
         }
@@ -195,14 +204,15 @@ class GameScene extends Phaser.Scene {
 
     draw() {
         this.graphics.clear();
+        this.previewGraphics.clear();
+
         // Draw board
         for (let y = 0; y < ROWS; y++) {
             for (let x = 0; x < COLS; x++) {
                 if (this.board[y][x] !== 0) {
                     this.graphics.fillStyle(COLORS[this.board[y][x]], 1);
-                    this.graphics.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                    this.graphics.lineStyle(2, 0xffffff, 0.5);
-                    this.graphics.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    // --- MODIFIED: Use BLOCK_SIZE - 1 to create a grid effect ---
+                    this.graphics.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
                 }
             }
         }
@@ -214,9 +224,30 @@ class GameScene extends Phaser.Scene {
             for (let y = 0; y < shape.length; y++) {
                 for (let x = 0; x < shape[y].length; x++) {
                     if (shape[y][x] !== 0) {
-                         this.graphics.fillRect((this.pieceX + x) * BLOCK_SIZE, (this.pieceY + y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                         this.graphics.lineStyle(2, 0xffffff, 0.5);
-                         this.graphics.strokeRect((this.pieceX + x) * BLOCK_SIZE, (this.pieceY + y) * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                         // --- MODIFIED: Use BLOCK_SIZE - 1 to create a grid effect ---
+                         this.graphics.fillRect((this.pieceX + x) * BLOCK_SIZE, (this.pieceY + y) * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
+                    }
+                }
+            }
+        }
+        
+        // --- NEW: Draw next piece in the preview box ---
+        if (this.nextPiece) {
+            const shape = this.nextPiece.shape;
+            // Center the piece in the preview box
+            const previewBoxWidth = 4 * BLOCK_SIZE;
+            const previewBoxHeight = 4 * BLOCK_SIZE;
+            const pieceWidth = shape[0].length * BLOCK_SIZE;
+            const pieceHeight = shape.length * BLOCK_SIZE;
+
+            const previewX = (COLS * BLOCK_SIZE + 20) + (previewBoxWidth - pieceWidth) / 2;
+            const previewY = 120 + (previewBoxHeight - pieceHeight) / 2;
+            
+            this.previewGraphics.fillStyle(COLORS[this.nextPiece.colorId], 1);
+            for (let y = 0; y < shape.length; y++) {
+                for (let x = 0; x < shape[y].length; x++) {
+                    if (shape[y][x] !== 0) {
+                        this.previewGraphics.fillRect(previewX + x * BLOCK_SIZE, previewY + y * BLOCK_SIZE, BLOCK_SIZE - 1, BLOCK_SIZE - 1);
                     }
                 }
             }
