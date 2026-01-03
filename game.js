@@ -41,12 +41,11 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // Using assets from Phaser Labs which are more stable
-        this.load.audio('clearSound', 'https://labs.phaser.io/assets/audio/SoundEffects/key.wav');
-        this.load.audio('dropSound', 'https://labs.phaser.io/assets/audio/SoundEffects/squit.wav');
-        this.load.audio('bgm', 'https://labs.phaser.io/assets/audio/oedipus_wizball_highscore.mp3');
-        // FIX: Replaced broken link with a working one from Phaser Labs
-        this.load.audio('gameOverMusic', 'https://labs.phaser.io/assets/audio/SoundEffects/gameover.wav');
+        // FIX: Replaced labs.phaser.io links with CORS-friendly jsDelivr links
+        this.load.audio('clearSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/p-ping.mp3');
+        this.load.audio('dropSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/low.mp3');
+        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/demon-tune.mp3');
+        this.load.audio('gameOverMusic', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/gameover.mp3');
     }
 
     create() {
