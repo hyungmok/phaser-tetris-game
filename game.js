@@ -127,18 +127,27 @@ class GameScene extends Phaser.Scene {
     }
 
     rotatePiece() {
-        const shape = this.currentPiece.shape;
+        const originalShape = this.currentPiece.shape;
         const newShape = [];
-        for (let y = 0; y < shape[0].length; y++) {
+        for (let y = 0; y < originalShape[0].length; y++) {
             newShape[y] = [];
-            for (let x = 0; x < shape.length; x++) {
-                newShape[y][x] = shape[shape.length - 1 - x][y];
+            for (let x = 0; x < originalShape.length; x++) {
+                newShape[y][x] = originalShape[originalShape.length - 1 - x][y];
             }
         }
 
-        if (!this.checkCollision(newShape, this.pieceX, this.pieceY)) {
-            this.currentPiece.shape = newShape;
+        // Test positions with wall kicks: 0 (current), -1 (left), +1 (right), -2, +2
+        const testOffsets = [0, -1, 1, -2, 2]; 
+
+        for (const offsetX of testOffsets) {
+            if (!this.checkCollision(newShape, this.pieceX + offsetX, this.pieceY)) {
+                this.pieceX += offsetX;
+                this.currentPiece.shape = newShape;
+                return; // Successful rotation
+            }
         }
+        
+        // If all kicks fail, the piece does not rotate.
     }
 
     checkCollision(shape, pieceX, pieceY) {
