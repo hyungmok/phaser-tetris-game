@@ -42,8 +42,7 @@ class GameScene extends Phaser.Scene {
     preload() {
         this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
         this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
-        this.load.audio('gameOverSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/cratedrop.wav');
-
+        
         // --- NEW: Load background and game over music ---
         this.load.audio('bgm', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/tetris-bgm.mp3');
         this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/emotion-s/phaser-tetris-game/main/assets/game-over.mp3');
@@ -118,7 +117,6 @@ class GameScene extends Phaser.Scene {
             if (this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY)) {
                 this.gameOver = true;
                 this.gameOverText.setVisible(true);
-                this.sound.play('gameOverSound');
                 
                 // --- NEW: Stop BGM and play game over music ---
                 this.bgm.stop();
