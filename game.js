@@ -41,11 +41,11 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        // FIX: Replaced labs.phaser.io links with CORS-friendly jsDelivr links
-        this.load.audio('clearSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/p-ping.mp3');
-        this.load.audio('dropSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/SoundEffects/low.mp3');
-        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/demon-tune.mp3');
-        this.load.audio('gameOverMusic', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples/public/assets/audio/gameover.mp3');
+        // FIX: Corrected jsDelivr URLs to point to the right asset paths
+        this.load.audio('clearSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples@master/assets/audio/SoundEffects/p-ping.mp3');
+        this.load.audio('dropSound', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples@master/assets/audio/SoundEffects/low.mp3');
+        this.load.audio('bgm', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples@master/assets/audio/demon-tune.mp3');
+        this.load.audio('gameOverMusic', 'https://cdn.jsdelivr.net/gh/photonstorm/phaser3-examples@master/assets/audio/jingles/jingle-lose-00.wav');
     }
 
     create() {
