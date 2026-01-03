@@ -67,6 +67,8 @@ class GameScene extends Phaser.Scene {
         this.gameOverText.setVisible(false);
 
         this.cursors = this.input.keyboard.createCursorKeys();
+        // --- NEW: Add space key for hard drop ---
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     }
 
     update(time, delta) {
@@ -126,6 +128,8 @@ class GameScene extends Phaser.Scene {
             this.dropPiece();
         } else if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
             this.rotatePiece();
+        } else if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this.hardDrop();
         }
     }
 
@@ -137,6 +141,16 @@ class GameScene extends Phaser.Scene {
             this.clearLines();
             this.spawnPiece();
         }
+    }
+
+    // --- NEW: Hard drop function ---
+    hardDrop() {
+        while (!this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY + 1)) {
+            this.pieceY++;
+        }
+        this.solidifyPiece();
+        this.clearLines();
+        this.spawnPiece();
     }
 
     rotatePiece() {
