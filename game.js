@@ -37,33 +37,33 @@ class GameScene extends Phaser.Scene {
         this.lastTime = 0;
         this.score = 0;
         this.gameOver = false;
+        this.musicStarted = false; // Flag to check if music has started
     }
 
     preload() {
-        this.load.audio('clearSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/key.wav');
-        this.load.audio('dropSound', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/SoundEffects/squit.wav');
-        
-        // --- FIX: Use correct URLs for audio assets ---
-        this.load.audio('bgm', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/oedipus_wizball_highscore.mp3');
-        this.load.audio('gameOverMusic', 'https://raw.githubusercontent.com/photonstorm/phaser3-examples/master/public/assets/audio/gameover.mp3'); // Corrected URL
+        // Using assets from Phaser Labs which are more stable
+        this.load.audio('clearSound', 'https://labs.phaser.io/assets/audio/SoundEffects/key.wav');
+        this.load.audio('dropSound', 'https://labs.phaser.io/assets/audio/SoundEffects/squit.wav');
+        this.load.audio('bgm', 'https://labs.phaser.io/assets/audio/oedipus_wizball_highscore.mp3');
+        // FIX: Replaced broken link with a working one from Phaser Labs
+        this.load.audio('gameOverMusic', 'https://labs.phaser.io/assets/audio/SoundEffects/gameover.wav');
     }
 
     create() {
-        // --- NEW: Play background music ---
         this.bgm = this.sound.add('bgm', { loop: true, volume: 0.5 });
-        this.bgm.play();
+        // We will start the music on first user input
 
         const boardBg = this.add.graphics();
         boardBg.fillStyle(0x222222);
         boardBg.fillRect(0, 0, COLS * BLOCK_SIZE, ROWS * BLOCK_SIZE);
-        
+
         this.initBoard();
         this.spawnPiece();
         this.spawnPiece();
 
         this.graphics = this.add.graphics();
         this.scoreText = this.add.text(COLS * BLOCK_SIZE + 20, 20, 'Score: 0', { fontSize: '24px', fill: '#fff' });
-        
+
         this.add.text(COLS * BLOCK_SIZE + 20, 80, 'Next:', { fontSize: '24px', fill: '#fff' });
         this.previewGraphics = this.add.graphics();
         const previewBox = this.add.graphics();
@@ -117,15 +117,23 @@ class GameScene extends Phaser.Scene {
             if (this.checkCollision(this.currentPiece.shape, this.pieceX, this.pieceY)) {
                 this.gameOver = true;
                 this.gameOverText.setVisible(true);
-                
-                // --- NEW: Stop BGM and play game over music ---
-                this.bgm.stop();
+
+                if(this.bgm.isPlaying) this.bgm.stop();
                 this.sound.play('gameOverMusic');
             }
         }
     }
 
     handleInput() {
+        // FIX: Start music on first user interaction to prevent AudioContext error
+        if (!this.musicStarted && (this.cursors.left.isDown || this.cursors.right.isDown || this.cursors.down.isDown || this.cursors.up.isDown || this.spaceKey.isDown)) {
+            if (!this.sound.locked) {
+                // some browsers won't allow sound to play until user interaction
+                this.bgm.play();
+                this.musicStarted = true;
+            }
+        }
+
         if (Phaser.Input.Keyboard.JustDown(this.cursors.left)) {
             if (!this.checkCollision(this.currentPiece.shape, this.pieceX - 1, this.pieceY)) {
                 this.pieceX--;
@@ -173,7 +181,7 @@ class GameScene extends Phaser.Scene {
             }
         }
 
-        const testOffsets = [0, -1, 1, -2, 2]; 
+        const testOffsets = [0, -1, 1, -2, 2];
 
         for (const offsetX of testOffsets) {
             if (!this.checkCollision(newShape, this.pieceX + offsetX, this.pieceY)) {
@@ -251,7 +259,7 @@ class GameScene extends Phaser.Scene {
                 }
             }
         }
-        
+
         if (this.nextPiece) {
             const shape = this.nextPiece.shape;
             const previewBoxWidth = 4 * BLOCK_SIZE;
@@ -261,7 +269,7 @@ class GameScene extends Phaser.Scene {
 
             const previewX = (COLS * BLOCK_SIZE + 20) + (previewBoxWidth - pieceWidth) / 2;
             const previewY = 120 + (previewBoxHeight - pieceHeight) / 2;
-            
+
             this.previewGraphics.fillStyle(COLORS[this.nextPiece.colorId], 1);
             for (let y = 0; y < shape.length; y++) {
                 for (let x = 0; x < shape[y].length; x++) {
